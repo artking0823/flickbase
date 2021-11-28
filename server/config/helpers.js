@@ -2,7 +2,7 @@ const sortArgsHelper = (sort) => {
   let sortArgs = {
     sortBy: "_id",
     order: "asc",
-    limit: 3,
+    limit: 8,
     skip: 0
   };
 

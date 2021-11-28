@@ -1,62 +1,60 @@
-const express = require('express');
+const express = require("express");
 let router = express.Router();
-const { checkLoggedIn } = require('../../middleware/auth');
-const { grantAccess } = require('../../middleware/roles');
-require('dotenv').config();
+const { checkLoggedIn } = require("../../middleware/auth");
+const { grantAccess } = require("../../middleware/roles");
+require("dotenv").config();
 
-const { User } = require('../../models/userModel');
+const { User } = require("../../models/userModel");
 
-router.route('/register').post(async (req, res) => {
+router.route("/register").post(async (req, res) => {
   try {
     if (await User.emailTaken(req.body.email)) {
-      return res.status(400).json({ message: 'Sorry email taken' });
+      return res.status(400).json({ message: "Sorry email taken" });
     }
 
     const user = new User({
       email: req.body.email,
-      password: req.body.password,
+      password: req.body.password
     });
 
     const token = user.generateToken();
     const doc = await user.save();
 
-    res.cookie('x-access-token', token).status(200).send(getUserProps(doc));
+    res.cookie("x-access-token", token).status(200).send(getUserProps(doc));
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: 'Error', error: error });
+    res.status(400).json({ message: "Error", error: error });
   }
 });
 
-router.route('/signin').post(async (req, res) => {
+router.route("/signin").post(async (req, res) => {
   try {
     let user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-      return res.status(400).json({ message: 'User not found.' });
+      return res.status(400).json({ message: "User not found." });
     }
 
     const compare = await user.comparePassword(req.body.password);
 
     if (!compare) {
-      return res.status(400).json({ message: 'Incorrect password.' });
+      return res.status(400).json({ message: "Incorrect password." });
     }
 
     const token = user.generateToken();
-    res.cookie('x-access-token', token).status(200).send(getUserProps(user));
+    res.cookie("x-access-token", token).status(200).send(getUserProps(user));
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: 'Error', error: error });
+    res.status(400).json({ message: "Error", error: error });
   }
 });
 
 router
-  .route('/profile')
-  .get(checkLoggedIn, grantAccess('readOwn', 'profile'), async (req, res) => {
+  .route("/profile")
+  .get(checkLoggedIn, grantAccess("readOwn", "profile"), async (req, res) => {
     try {
       const permission = res.locals.permission;
       const user = await User.findById(req.user._id);
       if (!user) {
-        return res.status(400).json({ message: 'User not found.' });
+        return res.status(400).json({ message: "User not found." });
       }
       res.status(200).json(permission.filter(user._doc));
     } catch (error) {
@@ -65,7 +63,7 @@ router
   })
   .patch(
     checkLoggedIn,
-    grantAccess('updateOwn', 'profile'),
+    grantAccess("updateOwn", "profile"),
     async (req, res) => {
       try {
         const user = await User.findOneAndUpdate(
@@ -74,16 +72,16 @@ router
             $set: {
               firstname: req.body.firstname,
               lastname: req.body.lastname,
-              age: req.body.age,
-            },
+              age: req.body.age
+            }
           },
           {
-            new: true,
+            new: true
           }
         );
 
         if (!user) {
-          return res.status(400).json({ message: 'User not found.' });
+          return res.status(400).json({ message: "User not found." });
         }
 
         res.status(200).json(getUserProps(user));
@@ -94,38 +92,37 @@ router
   );
 
 router
-  .route('/updateemail')
+  .route("/updateemail")
   .patch(
     checkLoggedIn,
-    grantAccess('updateOwn', 'profile'),
+    grantAccess("updateOwn", "profile"),
     async (req, res) => {
       try {
         if (await User.emailTaken(req.body.newemail)) {
-          return res.status(400).json({ message: 'Email already taken.' });
+          return res.status(400).json({ message: "Email already taken." });
         }
         const user = await User.findOneAndUpdate(
           { _id: req.user._id, email: req.body.email },
           {
             $set: {
-              email: req.body.newemail,
-            },
+              email: req.body.newemail
+            }
           },
           {
-            new: true,
+            new: true
           }
         );
 
         if (!user) {
-          return res.status(400).json({ message: 'User not found.' });
+          return res.status(400).json({ message: "User not found." });
         }
 
         const token = user.generateToken();
         res
-          .cookie('x-access-token', token)
+          .cookie("x-access-token", token)
           .status(200)
           .send({ email: user.email });
       } catch (error) {
-        console.log(error);
         res
           .status(400)
           .json({ message: `There's a problem with updating your email.` });
@@ -133,7 +130,7 @@ router
     }
   );
 
-router.route('/isauth').get(checkLoggedIn, async (req, res, next) => {
+router.route("/isauth").get(checkLoggedIn, async (req, res, next) => {
   res.status(200).send(getUserProps(req.user));
 });
 
@@ -144,7 +141,7 @@ const getUserProps = (user) => {
     firstname: user.firstname,
     lastname: user.lastname,
     age: user.age,
-    role: user.role,
+    role: user.role
   };
 };
 

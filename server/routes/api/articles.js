@@ -21,7 +21,6 @@ router
         const result = await article.save();
         res.status(200).json(article);
       } catch (error) {
-        console.log(error);
         res
           .status(400)
           .json({ message: "Error adding article.", error: error });
@@ -40,7 +39,6 @@ router
       }
       res.status(200).json(article);
     } catch (error) {
-      console.log(error);
       res.status(400).json({ message: "Error retrieving info. ", error });
     }
   })
@@ -62,7 +60,6 @@ router
 
         res.status(200).json(article);
       } catch (error) {
-        console.log(error);
         res.status(400).json({ message: "Error updating article. ", error });
       }
     }
@@ -73,7 +70,7 @@ router
     async (req, res) => {
       try {
         const _id = req.params.id;
-        const article = await Article.findOneAndRemove(_id);
+        const article = await Article.findByIdAndRemove(_id);
 
         if (!article) {
           return res.status(400).json({ message: "Article not found." });
@@ -81,7 +78,6 @@ router
 
         res.status(200).json(article);
       } catch (error) {
-        console.log(error);
         res.status(400).json({ message: "Error deleting article. ", error });
       }
     }
@@ -101,7 +97,6 @@ router
       const articles = await Article.aggregatePaginate(aggQuery, options);
       res.status(200).json(articles);
     } catch (error) {
-      console.log(error);
       res.status(400).json({ message: "Pagination error. ", error });
     }
   });
@@ -115,7 +110,6 @@ router.route("/getbyid/:id").get(async (req, res) => {
     }
     res.status(200).json(article);
   } catch (error) {
-    console.log(error);
     res.status(400).json({ message: "Error retrieving article. ", error });
   }
 });
@@ -129,7 +123,6 @@ router.route("/loadmore").post(async (req, res) => {
       .limit(sortArgs.limit);
     res.status(200).json(articles);
   } catch (error) {
-    console.log(error);
     res.status(400).json({ message: "Error loading more. ", error });
   }
 });
