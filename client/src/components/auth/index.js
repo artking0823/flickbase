@@ -87,11 +87,7 @@ const Auth = (props) => {
             size="small"
             variant="outlined"
             color="primary"
-<<<<<<< HEAD
             large
-=======
-            size="large"
->>>>>>> 17c865a3151728b48eed4e8922919c11a0219bc5
             onClick={() => setRegister(!register)}
           >
             Want to {!register ? "Register" : "Login"}
